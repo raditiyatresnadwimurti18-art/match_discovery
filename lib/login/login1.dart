@@ -12,7 +12,15 @@ class _Login1State extends State<Login1> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      body: Column(children: []),
+      body: Center(
+        child: Column(
+          children: [
+            Image.asset('assets/images/logof1.png', height: 300),
+            TextFormField(),
+            TextFormField(),
+          ],
+        ),
+      ),
     );
   }
 }
