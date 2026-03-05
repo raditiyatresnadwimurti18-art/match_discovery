@@ -1,10 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:match_discovery/database/preferences.dart';
 import 'package:match_discovery/extension/navigator.dart';
-import 'package:match_discovery/login/persyaratan.dart';
+import 'package:match_discovery/login/login.dart';
 
-class Reggister extends StatelessWidget {
+class Reggister extends StatefulWidget {
   const Reggister({super.key});
 
+  @override
+  State<Reggister> createState() => _ReggisterState();
+}
+
+class _ReggisterState extends State<Reggister> {
+  final TextEditingController emailControler = TextEditingController();
+  final TextEditingController passwordControler = TextEditingController();
+  final TextEditingController namaControler = TextEditingController();
+  final TextEditingController tlponControler = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -15,43 +26,92 @@ class Reggister extends StatelessWidget {
           child: Column(
             children: [
               Image.asset('assets/images/logof1.png', height: 300),
-              TextFormField(
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(34),
-                  ),
-                  icon: Icon(Icons.email),
-                  hintText: 'Email',
-                ),
-              ),
-              SizedBox(height: 10),
-              TextFormField(
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(34),
-                  ),
-                  icon: Icon(Icons.password),
-                  hintText: 'Pasword',
-                ),
-              ),
-              SizedBox(height: 10),
-              TextFormField(
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(34),
-                  ),
-                  icon: Icon(Icons.person),
-                  hintText: 'Nama',
-                ),
-              ),
-              SizedBox(height: 10),
-              TextFormField(
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(34),
-                  ),
-                  icon: Icon(Icons.phone),
-                  hintText: 'No Tlpon',
+              Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    TextFormField(
+                      controller: emailControler,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Tidak boleh kosong';
+                        } else if (!value.contains('@')) {
+                          return 'Harus mengandung @';
+                        } else if (!value.contains('gmail.com')) {
+                          return 'Email tidak valid';
+                        } else {
+                          return null;
+                        }
+                      },
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(34),
+                        ),
+                        icon: Icon(Icons.email),
+                        hintText: 'Email',
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    TextFormField(
+                      controller: passwordControler,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Isi dulu bos!';
+                        } else if (value.length < 8) {
+                          return 'Kurang panjang (min 8)';
+                        } else if (!value.contains(RegExp(r'[A-Z]'))) {
+                          return 'Butuh huruf kapital';
+                        } else if (!value.contains(RegExp(r'[0-9]'))) {
+                          return 'Butuh angka';
+                        } else {
+                          return null;
+                        }
+                      },
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(34),
+                        ),
+                        icon: Icon(Icons.password),
+                        hintText: 'Pasword',
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    TextFormField(
+                      controller: namaControler,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Nama tidak boleh kosong';
+                        } else {
+                          return null;
+                        }
+                      },
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(34),
+                        ),
+                        icon: Icon(Icons.person),
+                        hintText: 'Nama',
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    TextFormField(
+                      controller: tlponControler,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Tlpon tidak boleh kosong';
+                        } else {
+                          return null;
+                        }
+                      },
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(34),
+                        ),
+                        icon: Icon(Icons.phone),
+                        hintText: 'No Tlpon',
+                      ),
+                    ),
+                  ],
                 ),
               ),
               SizedBox(height: 30),
@@ -64,7 +124,23 @@ class Reggister extends StatelessWidget {
                       height: 50,
                       child: OutlinedButton(
                         onPressed: () {
-                          context.push(Persyaratan());
+                          if (_formKey.currentState!.validate()) {
+                            PreferenceHandler().storingIsLogin(true);
+                            context.push(Login());
+                          }
+                          if (passwordControler.text.isEmpty ||
+                              emailControler.text.isEmpty ||
+                              namaControler.text.isEmpty ||
+                              tlponControler.text.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Harus dilengkapi')),
+                            );
+                            return;
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Data Ditambahkan')),
+                            );
+                          }
                         },
                         style: OutlinedButton.styleFrom(
                           backgroundColor: Colors.blueAccent,

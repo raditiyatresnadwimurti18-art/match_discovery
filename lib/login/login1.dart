@@ -11,6 +11,9 @@ class Login1 extends StatefulWidget {
 }
 
 class _Login1State extends State<Login1> {
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,23 +24,32 @@ class _Login1State extends State<Login1> {
           child: Column(
             children: [
               Image.asset('assets/images/logof1.png', height: 300),
-              TextFormField(
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(34),
-                  ),
-                  icon: Icon(Icons.email),
-                  hintText: 'Email',
-                ),
-              ),
-              SizedBox(height: 10),
-              TextFormField(
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(34),
-                  ),
-                  icon: Icon(Icons.password),
-                  hintText: 'Pasword',
+              Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    TextFormField(
+                      controller: emailController,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(34),
+                        ),
+                        icon: Icon(Icons.email),
+                        hintText: 'Email',
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    TextFormField(
+                      controller: passwordController,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(34),
+                        ),
+                        icon: Icon(Icons.password),
+                        hintText: 'Pasword',
+                      ),
+                    ),
+                  ],
                 ),
               ),
               SizedBox(height: 30),
@@ -71,34 +83,7 @@ class _Login1State extends State<Login1> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 10),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: OutlinedButton(
-                        onPressed: () {
-                          context.push(Reggister());
-                        },
-                        style: OutlinedButton.styleFrom(
-                          backgroundColor: Colors.blueAccent,
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Belum Punya Akun',
-                              style: TextStyle(
-                                color: const Color.fromARGB(255, 255, 255, 255),
-                              ),
-                            ),
-                            Icon(
-                              Icons.chevron_right,
-                              color: const Color.fromARGB(255, 255, 255, 255),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+
                     SizedBox(height: 10),
                     SizedBox(
                       width: double.infinity,
@@ -124,6 +109,18 @@ class _Login1State extends State<Login1> {
                           ],
                         ),
                       ),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text('belum punya Akun?'),
+                        TextButton(
+                          onPressed: () {
+                            context.push(Reggister());
+                          },
+                          child: Text('Daftar'),
+                        ),
+                      ],
                     ),
                   ],
                 ),
