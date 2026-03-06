@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:match_discovery/database/login_controller.dart';
 import 'package:match_discovery/database/preferences.dart';
+import 'package:match_discovery/database/sql_lite.dart';
 import 'package:match_discovery/extension/navigator.dart';
 import 'package:match_discovery/login/login.dart';
+import 'package:match_discovery/login/login1.dart';
+import 'package:match_discovery/models/login_model.dart';
 
 class Reggister extends StatefulWidget {
   const Reggister({super.key});
@@ -16,6 +20,7 @@ class _ReggisterState extends State<Reggister> {
   final TextEditingController namaControler = TextEditingController();
   final TextEditingController tlponControler = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  bool x = true;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,6 +58,7 @@ class _ReggisterState extends State<Reggister> {
                     ),
                     SizedBox(height: 10),
                     TextFormField(
+                      obscureText: x,
                       controller: passwordControler,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -72,6 +78,16 @@ class _ReggisterState extends State<Reggister> {
                           borderRadius: BorderRadius.circular(34),
                         ),
                         icon: Icon(Icons.password),
+                        suffixIcon: IconButton(
+                          onPressed: () {
+                            setState(() {
+                              x = !x;
+                            });
+                          },
+                          icon: Icon(
+                            x ? Icons.visibility_off : Icons.visibility,
+                          ),
+                        ),
                         hintText: 'Pasword',
                       ),
                     ),
@@ -124,10 +140,6 @@ class _ReggisterState extends State<Reggister> {
                       height: 50,
                       child: OutlinedButton(
                         onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            PreferenceHandler().storingIsLogin(true);
-                            context.push(Login());
-                          }
                           if (passwordControler.text.isEmpty ||
                               emailControler.text.isEmpty ||
                               namaControler.text.isEmpty ||
@@ -137,10 +149,19 @@ class _ReggisterState extends State<Reggister> {
                             );
                             return;
                           } else {
+                            context.push(Login1());
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(content: Text('Data Ditambahkan')),
                             );
                           }
+                          DBHelper.registerUser(
+                            LoginModel(
+                              nama: namaControler.text,
+                              password: passwordControler.text,
+                              tlpon: tlponControler.text,
+                              email: emailControler.text,
+                            ),
+                          );
                         },
                         style: OutlinedButton.styleFrom(
                           backgroundColor: Colors.blueAccent,

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:match_discovery/database/preferences.dart';
+import 'package:match_discovery/database/sql_lite.dart';
 import 'package:match_discovery/extension/navigator.dart';
 import 'package:match_discovery/home/home.dart';
 import 'package:match_discovery/login/reggister.dart';
+import 'package:match_discovery/models/login_model.dart';
 
 class Login1 extends StatefulWidget {
   const Login1({super.key});
@@ -11,6 +14,7 @@ class Login1 extends StatefulWidget {
 }
 
 class _Login1State extends State<Login1> {
+  bool x = true;
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -41,11 +45,23 @@ class _Login1State extends State<Login1> {
                     SizedBox(height: 10),
                     TextFormField(
                       controller: passwordController,
+                      obscureText: x,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(34),
                         ),
                         icon: Icon(Icons.password),
+
+                        suffixIcon: IconButton(
+                          onPressed: () {
+                            setState(() {
+                              x = !x;
+                            });
+                          },
+                          icon: Icon(
+                            x ? Icons.visibility_off : Icons.visibility,
+                          ),
+                        ),
                         hintText: 'Pasword',
                       ),
                     ),
@@ -61,7 +77,38 @@ class _Login1State extends State<Login1> {
                       width: double.infinity,
                       height: 50,
                       child: OutlinedButton(
-                        onPressed: () {},
+                        onPressed: () async {
+                          final LoginModel? login = await DBHelper.loginUser(
+                            email: emailController.text,
+                            password: passwordController.text,
+                          );
+                          if (login != null) {
+                            // LOGIN BERHASIL
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'Login Berhasil! Selamat Datang.',
+                                ),
+                              ),
+                            );
+
+                            // Pindah ke halaman Home (sesuaikan nama class Home kamu)
+                            await Future.delayed(Duration(seconds: 2));
+                            if (_formKey.currentState!.validate()) {
+                              PreferenceHandler.storingIsLogin(true);
+                              context.pushAndRemoveAll(Home());
+                            }
+                          } else {
+                            // LOGIN GAGAL
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Email atau Password salah!'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        },
                         style: OutlinedButton.styleFrom(
                           backgroundColor: Colors.blueAccent,
                         ),

@@ -174,41 +174,13 @@ class Login extends StatelessWidget {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(
-                            'Daftar sekarang',
-                            style: TextStyle(color: Colors.white),
-                          ),
+                          Text('Lanjut', style: TextStyle(color: Colors.white)),
                           Icon(Icons.chevron_right, color: Colors.white),
                         ],
                       ),
                     ),
                   ),
-                  SizedBox(height: 10),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: OutlinedButton(
-                      onPressed: () {},
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: Colors.black),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Memiliki akun',
-                            style: TextStyle(
-                              color: const Color.fromARGB(255, 0, 0, 0),
-                            ),
-                          ),
-                          Icon(
-                            Icons.chevron_right,
-                            color: const Color.fromARGB(255, 0, 0, 0),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+
                   SizedBox(height: 100),
                 ],
               ),
