@@ -3,12 +3,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 class PreferenceHandler {
   //Inisialisasi Shared Preference
   static final PreferenceHandler _instance = PreferenceHandler._internal();
-  late SharedPreferences _preferences;
+
   factory PreferenceHandler() => _instance;
   PreferenceHandler._internal();
-  Future<void> init() async {
-    _preferences = await SharedPreferences.getInstance();
-  }
+  Future<void> init() async {}
 
   //Key user
   static const String _isLogin = 'isLogin';

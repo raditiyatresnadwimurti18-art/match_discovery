@@ -10,6 +10,9 @@ class HistoryLomba extends StatefulWidget {
 class _HistoryLombaState extends State<HistoryLomba> {
   @override
   Widget build(BuildContext context) {
-    return Center(child: Text('data history'));
+    return Scaffold(body: Column(children: [
+          
+        ],
+      ));
   }
 }

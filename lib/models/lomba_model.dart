@@ -6,9 +6,10 @@ class LombaModel {
   final String judul;
   final String gambarPath;
   final int kuota;
-  final String jenis;
+  final String jenis; // Kategori
   final String tanggal;
   final String lokasi;
+  final String deskripsi;
 
   LombaModel({
     this.id,
@@ -18,20 +19,8 @@ class LombaModel {
     required this.jenis,
     required this.tanggal,
     required this.lokasi,
+    required this.deskripsi,
   });
-
-  // Mengubah data dari Database (Map) menjadi Objek (LombaModel)
-  factory LombaModel.fromMap(Map<String, dynamic> map) {
-    return LombaModel(
-      id: map['id'] != null ? map['id'] as int : null,
-      judul: map['judul'] as String,
-      gambarPath: map['gambarPath'] as String,
-      kuota: map['kuota'] as int,
-      jenis: map['jenis'] as String,
-      tanggal: map['tanggal'] as String,
-      lokasi: map['lokasi'] as String,
-    );
-  }
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
@@ -42,7 +31,21 @@ class LombaModel {
       'jenis': jenis,
       'tanggal': tanggal,
       'lokasi': lokasi,
+      'deskripsi': deskripsi,
     };
+  }
+
+  factory LombaModel.fromMap(Map<String, dynamic> map) {
+    return LombaModel(
+      id: map['id'] != null ? map['id'] as int : null,
+      judul: map['judul'] as String,
+      gambarPath: map['gambarPath'] as String,
+      kuota: map['kuota'] as int,
+      jenis: map['jenis'] as String,
+      tanggal: map['tanggal'] as String,
+      lokasi: map['lokasi'] as String,
+      deskripsi: map['deskripsi'] as String,
+    );
   }
 
   String toJson() => json.encode(toMap());

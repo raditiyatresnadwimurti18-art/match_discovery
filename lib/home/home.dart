@@ -4,6 +4,7 @@ import 'package:match_discovery/extension/navigator.dart';
 import 'package:match_discovery/home/history_lomba.dart';
 import 'package:match_discovery/home/isihome.dart';
 import 'package:match_discovery/home/profil.dart';
+import 'package:match_discovery/home/tambah_lomba.dart';
 import 'package:match_discovery/login/login.dart';
 
 class Home extends StatefulWidget {
@@ -14,9 +15,13 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  static const List<Widget> _widgetOption = <Widget>[IsiHome(), HistoryLomba()];
+  static const List<Widget> _widgetOption = <Widget>[
+    IsiHome(),
+    HistoryLomba(),
+    TambahLomba(),
+  ];
   int _selectIndex = 0;
-  void _ketikaDitekan2(int index2) {
+  void _ketikaDitekan(int index2) {
     _selectIndex = index2;
     setState(() {});
   }
@@ -45,22 +50,16 @@ class _HomeState extends State<Home> {
           ),
         ),
       ),
-      body: Column(
-        children: [Center(child: _widgetOption.elementAt(_selectIndex))],
-      ),
+      body: Center(child: _widgetOption.elementAt(_selectIndex)),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.history), label: 'History'),
+          BottomNavigationBarItem(icon: Icon(Icons.add), label: 'Daftarkan'),
         ],
         currentIndex: _selectIndex,
-        onTap: (value) {
-          if (value == 0) {
-            _ketikaDitekan2(0);
-          } else {
-            _ketikaDitekan2(1);
-          }
-        },
+        onTap: _ketikaDitekan,
+
         // selectedItemColor: Colors.blueAccent,
       ),
     );

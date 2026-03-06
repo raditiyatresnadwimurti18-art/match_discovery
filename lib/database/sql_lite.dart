@@ -38,7 +38,8 @@ class DBHelper {
       kuota INTEGER,
       jenis TEXT,
       tanggal TEXT,
-      lokasi TEXT
+      lokasi TEXT,
+      deskripsi TEXT
     )
   ''');
   }

@@ -13,8 +13,9 @@ class IsiHome extends StatefulWidget {
 class _IsiHomeState extends State<IsiHome> {
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
+    return Padding(
       padding: EdgeInsets.symmetric(horizontal: 10),
+
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start, // Pastikan mulai dari atas
         crossAxisAlignment: CrossAxisAlignment.start,
