@@ -8,40 +8,43 @@ class DBHelper {
   static Future<Database> db() async {
     final dbPath = await getDatabasesPath();
     return openDatabase(
-      join(
-        dbPath,
-        'Match_Discovery_db',
-      ), // Gunakan underscore agar nama file lebih aman
+      join(dbPath, 'Match_Discovery_db'),
       version: 2,
       onCreate: (db, version) async {
         await db.execute(
           'CREATE TABLE user (id INTEGER PRIMARY KEY AUTOINCREMENT, nama TEXT, password TEXT, email TEXT, tlpon TEXT)',
         );
-        // Jika user baru instal, langsung buat tabel lomba
-        await _createLombaTable(db);
+        await db.execute('''
+          CREATE TABLE lomba (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            judul TEXT,
+            gambarPath TEXT,
+            kuota INTEGER,
+            jenis TEXT,
+            tanggal TEXT,
+            lokasi TEXT,
+            deskripsi TEXT
+          )
+        ''');
       },
       onUpgrade: (db, oldVersion, newVersion) async {
-        // Jika user lama update app, tambahkan tabel lomba
         if (oldVersion < 2) {
-          await _createLombaTable(db);
+          // Command untuk menambah tabel jika user melakukan update app
+          await db.execute('''
+            CREATE TABLE IF NOT EXISTS lomba (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              judul TEXT,
+              gambarPath TEXT,
+              kuota INTEGER,
+              jenis TEXT,
+              tanggal TEXT,
+              lokasi TEXT,
+              deskripsi TEXT
+            )
+          ''');
         }
       },
     );
-  }
-
-  static Future<void> _createLombaTable(Database db) async {
-    await db.execute('''
-    CREATE TABLE lomba (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      judul TEXT,
-      gambarPath TEXT,
-      kuota INTEGER,
-      jenis TEXT,
-      tanggal TEXT,
-      lokasi TEXT,
-      deskripsi TEXT
-    )
-  ''');
   }
 
   static Future<void> registerUser(LoginModel user) async {
@@ -81,6 +84,11 @@ class DBHelper {
       ); // Mengonversi hasil query menjadi objek
     }
     return null;
+  }
+
+  static Future<int> updateLomba(int id, Map<String, dynamic> data) async {
+    final dbs = await db();
+    return await dbs.update('lomba', data, where: 'id = ?', whereArgs: [id]);
   }
 
   // Fungsi Simpan Lomba

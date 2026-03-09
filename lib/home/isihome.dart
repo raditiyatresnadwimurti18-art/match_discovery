@@ -16,10 +16,16 @@ class _IsiHomeState extends State<IsiHome> {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 10),
 
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start, // Pastikan mulai dari atas
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [Widget1(), Widget2()],
+      child: SizedBox(
+        height: double.infinity,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment:
+                MainAxisAlignment.start, // Pastikan mulai dari atas
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [Widget1(), Widget2()],
+          ),
+        ),
       ),
     );
   }

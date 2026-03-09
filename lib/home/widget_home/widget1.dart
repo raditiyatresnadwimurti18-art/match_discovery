@@ -22,11 +22,7 @@ class Widget1 extends StatelessWidget {
             suffixIcon: Icon(Icons.filter_list),
           ),
         ),
-        SizedBox(height: 15),
-        Text(
-          'Kategori populer',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
+
         SizedBox(height: 20),
       ],
     );
