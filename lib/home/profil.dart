@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:match_discovery/database/preferences.dart';
 import 'package:match_discovery/database/sql_lite.dart';
 import 'package:match_discovery/extension/navigator.dart';
 import 'package:match_discovery/login/login.dart';
 import 'package:match_discovery/models/login_model.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ProfilUser extends StatefulWidget {
   const ProfilUser({super.key});
@@ -13,6 +16,24 @@ class ProfilUser extends StatefulWidget {
 }
 
 class _ProfilUserState extends State<ProfilUser> {
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> _pickImage() async {
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+
+    if (image != null && _user != null) {
+      // 1. Update ke Database
+      await DBHelper.updateUserProfile(_user!.id!, image.path);
+
+      // 2. Refresh data di UI
+      _fetchUserData();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Foto profil berhasil diperbarui')),
+      );
+    }
+  }
+
   LoginModel? _user;
 
   @override
@@ -68,30 +89,54 @@ class _ProfilUserState extends State<ProfilUser> {
                 children: [
                   SizedBox(height: 50),
                   Center(
-                    child: Container(
-                      width: 100,
-                      height: 100,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: const Color.fromARGB(255, 0, 0, 0),
-                          width: 4.0,
+                    child: Stack(
+                      // Gunakan Stack agar bisa menaruh tombol edit di atas foto
+                      children: [
+                        Container(
+                          width: 120,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: const Color(0xff0f2a55),
+                              width: 4.0,
+                            ),
+                          ),
+                          child: ClipOval(
+                            child:
+                                _user?.profilePath != null &&
+                                    _user!.profilePath!.isNotEmpty
+                                ? Image.file(
+                                    File(_user!.profilePath!),
+                                    fit: BoxFit.cover,
+                                    errorBuilder:
+                                        (context, error, stackTrace) =>
+                                            const Icon(Icons.person, size: 80),
+                                  )
+                                : const Icon(Icons.person, size: 80),
+                          ),
                         ),
-                      ),
-                      // Hapus padding negatif tadi!
-                      child: ClipOval(
-                        child: Transform.scale(
-                          scale:
-                              1.4, // Mengatur seberapa besar ikon/gambar (1.5 = 150%)
-                          child: const FittedBox(
-                            fit: BoxFit.cover,
-                            child: Icon(
-                              Icons.person,
-                              color: Color.fromARGB(255, 0, 0, 0),
+                        // Tombol Edit
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: GestureDetector(
+                            onTap: _pickImage,
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: const BoxDecoration(
+                                color: Color(0xff0f2a55),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.camera_alt,
+                                color: Colors.white,
+                                size: 20,
+                              ),
                             ),
                           ),
                         ),
-                      ),
+                      ],
                     ),
                   ),
                   Text(

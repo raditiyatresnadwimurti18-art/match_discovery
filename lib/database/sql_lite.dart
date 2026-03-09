@@ -12,7 +12,7 @@ class DBHelper {
       version: 2,
       onCreate: (db, version) async {
         await db.execute(
-          'CREATE TABLE user (id INTEGER PRIMARY KEY AUTOINCREMENT, nama TEXT, password TEXT, email TEXT, tlpon TEXT)',
+          'CREATE TABLE user (id INTEGER PRIMARY KEY AUTOINCREMENT, nama TEXT, password TEXT, email TEXT, tlpon TEXT, profilePath TEXT)',
         );
         await db.execute('''
           CREATE TABLE lomba (
@@ -42,6 +42,9 @@ class DBHelper {
               deskripsi TEXT
             )
           ''');
+        }
+        if (oldVersion < 3) {
+          await db.execute('ALTER TABLE user ADD COLUMN profilePath TEXT');
         }
       },
     );
@@ -110,5 +113,15 @@ class DBHelper {
   static Future<int> deleteLomba(int id) async {
     final dbs = await db();
     return await dbs.delete('lomba', where: 'id = ?', whereArgs: [id]);
+  }
+
+  static Future<int> updateUserProfile(int id, String imagePath) async {
+    final dbs = await db();
+    return await dbs.update(
+      'user',
+      {'profilePath': imagePath},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
   }
 }

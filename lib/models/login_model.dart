@@ -7,12 +7,14 @@ class LoginModel {
   final String password;
   final String email;
   final String tlpon;
+  final String? profilePath;
   LoginModel({
     this.id,
     required this.nama,
     required this.password,
     required this.email,
     required this.tlpon,
+    this.profilePath,
   });
 
   Map<String, dynamic> toMap() {
@@ -22,6 +24,7 @@ class LoginModel {
       'password': password,
       'email': email,
       'tlpon': tlpon,
+      'profilePath': profilePath,
     };
   }
 
@@ -32,6 +35,9 @@ class LoginModel {
       password: map['password'] as String,
       email: map['email'] as String,
       tlpon: map['tlpon'] as String,
+      profilePath: map['profilePath'] != null
+          ? map['profilePath'] as String
+          : null,
     );
   }
 
