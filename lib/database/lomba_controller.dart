@@ -14,7 +14,6 @@ class LombaControler {
       conflictAlgorithm: ConflictAlgorithm
           .replace, // Jika ID sama, akan ditimpa (update otomatis)
     );
-    print("Data Lomba Berhasil Disimpan: ${data.judul}");
   }
 
   // 2. Fungsi Ambil Semua Lomba (Read)
