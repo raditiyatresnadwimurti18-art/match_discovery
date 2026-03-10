@@ -1,5 +1,5 @@
-import 'package:match_discovery/database/sql_lite.dart';
-import 'package:match_discovery/models/login_model.dart';
+import '../models/login_model.dart';
+import 'sql_lite.dart';
 
 class LoginController {
   static Future<void> registerUser(LoginModel user) async {

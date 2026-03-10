@@ -4,6 +4,7 @@ import 'package:match_discovery/database/preferences.dart';
 import 'package:match_discovery/database/sql_lite.dart';
 import 'package:match_discovery/models/login_model.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:match_discovery/models/riwayat_model.dart';
 
 class Widget2 extends StatefulWidget {
   const Widget2({super.key});
@@ -139,8 +140,30 @@ class _Widget2State extends State<Widget2> {
     _refreshLomba();
   }
 
+  // late int id;
+  void _konfirmasiIkutiLomba(int lombaId) async {
+    int? userId = await PreferenceHandler.getId();
+
+    if (userId != null) {
+      await DBHelper.ikutiLomba(
+        RiwayatModel(
+          idUser: userId,
+          idLomba: lombaId, // 'id' didapat dari parameter detail dialog
+        ),
+      );
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Berhasil mengikuti lomba!")),
+      );
+      Navigator.pop(context); // Tutup dialog
+    } else {
+      // Arahkan ke login jika ID tidak ditemukan
+    }
+  }
+
   void _showDetailDialog(
     BuildContext context,
+    int id,
     String judul,
     String lokasi,
     String _imagePath,
@@ -191,12 +214,25 @@ class _Widget2State extends State<Widget2> {
             ],
           ),
           actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text(
-                "Tutup",
-                style: TextStyle(color: Color(0xFF6366F1)),
-              ),
+            Row(
+              children: [
+                TextButton(
+                  onPressed: () {
+                    _konfirmasiIkutiLomba(id);
+                  },
+                  child: const Text(
+                    "Ikuti Lomba",
+                    style: TextStyle(color: Color(0xFF6366F1)),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text(
+                    "Tutup",
+                    style: TextStyle(color: Color(0xFF6366F1)),
+                  ),
+                ),
+              ],
             ),
           ],
         );
@@ -261,6 +297,7 @@ class _Widget2State extends State<Widget2> {
                         // Fungsi untuk menampilkan pop up
                         _showDetailDialog(
                           context,
+                          _allLomba[index]['id'],
                           _allLomba[index]['judul'],
                           _allLomba[index]['lokasi'],
                           _allLomba[index]['gambarPath'],

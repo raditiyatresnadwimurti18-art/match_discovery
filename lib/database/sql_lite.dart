@@ -1,6 +1,7 @@
 import 'package:match_discovery/database/preferences.dart';
 
 import 'package:match_discovery/models/login_model.dart';
+import 'package:match_discovery/models/riwayat_model.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -9,7 +10,7 @@ class DBHelper {
     final dbPath = await getDatabasesPath();
     return openDatabase(
       join(dbPath, 'Match_Discovery_db'),
-      version: 2,
+      version: 4,
       onCreate: (db, version) async {
         await db.execute(
           'CREATE TABLE user (id INTEGER PRIMARY KEY AUTOINCREMENT, nama TEXT, password TEXT, email TEXT, tlpon TEXT, profilePath TEXT)',
@@ -26,9 +27,17 @@ class DBHelper {
             deskripsi TEXT
           )
         ''');
+        await db.execute('''
+        CREATE TABLE riwayat (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          idUser INTEGER,
+          idLomba INTEGER,
+          tanggalDaftar TEXT
+        )
+      ''');
       },
       onUpgrade: (db, oldVersion, newVersion) async {
-        if (oldVersion < 2) {
+        if (oldVersion < 3) {
           // Command untuk menambah tabel jika user melakukan update app
           await db.execute('''
             CREATE TABLE IF NOT EXISTS lomba (
@@ -45,6 +54,16 @@ class DBHelper {
         }
         if (oldVersion < 3) {
           await db.execute('ALTER TABLE user ADD COLUMN profilePath TEXT');
+        }
+        if (oldVersion < 4) {
+          await db.execute('''
+          CREATE TABLE IF NOT EXISTS riwayat (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            idUser INTEGER,
+            idLomba INTEGER,
+            tanggalDaftar TEXT
+          )
+        ''');
         }
       },
     );
@@ -122,6 +141,29 @@ class DBHelper {
       {'profilePath': imagePath},
       where: 'id = ?',
       whereArgs: [id],
+    );
+  }
+
+  //Fungsi untuk mengambil riwayat lomba berdasarkan User ID
+  static Future<void> ikutiLomba(RiwayatModel riwayat) async {
+    final dbs = await db();
+    int result = await dbs.insert('riwayat', riwayat.toMap());
+    print(
+      "Hasil simpan database: $result",
+    ); // Jika muncul angka > 0, berarti berhasil
+  }
+
+  // Fungsi untuk mengambil riwayat lomba berdasarkan User ID
+  static Future<List<Map<String, dynamic>>> getRiwayatLomba(int idUser) async {
+    final dbs = await db();
+    // Menggunakan JOIN untuk mengambil detail lombanya sekaligus
+    return await dbs.rawQuery(
+      '''
+    SELECT lomba.* FROM lomba 
+    INNER JOIN riwayat ON lomba.id = riwayat.idLomba 
+    WHERE riwayat.idUser = ?
+  ''',
+      [idUser],
     );
   }
 }
