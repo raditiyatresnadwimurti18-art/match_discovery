@@ -20,6 +20,9 @@ class _Widget2State extends State<Widget2> {
   // Controller untuk Form
   final TextEditingController _judulController = TextEditingController();
   final TextEditingController _lokasiController = TextEditingController();
+  final TextEditingController _deskripsiController = TextEditingController();
+  final TextEditingController _kuotaController = TextEditingController();
+  final TextEditingController _jenisController = TextEditingController();
 
   @override
   void initState() {
@@ -55,9 +58,16 @@ class _Widget2State extends State<Widget2> {
       );
       _judulController.text = existingData['judul'];
       _lokasiController.text = existingData['lokasi'];
+      _deskripsiController.text = existingData['deskripsi'];
+      _kuotaController.text = existingData['kuota']?.toString() ?? "";
+      ;
+      _jenisController.text = existingData['jenis'];
     } else {
       _judulController.clear();
       _lokasiController.clear();
+      _deskripsiController.clear();
+      _kuotaController.clear();
+      _jenisController.clear();
     }
 
     showModalBottomSheet(
@@ -100,6 +110,19 @@ class _Widget2State extends State<Widget2> {
               controller: _lokasiController,
               decoration: const InputDecoration(labelText: 'Lokasi'),
             ),
+            TextField(
+              controller: _jenisController,
+              decoration: const InputDecoration(labelText: 'jenis'),
+            ),
+            TextField(
+              controller: _kuotaController,
+              decoration: const InputDecoration(labelText: 'kuota'),
+              keyboardType: TextInputType.number,
+            ),
+            TextField(
+              controller: _deskripsiController,
+              decoration: const InputDecoration(labelText: 'deskripsi'),
+            ),
             const SizedBox(height: 20),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -110,6 +133,9 @@ class _Widget2State extends State<Widget2> {
                   'judul': _judulController.text,
                   'lokasi': _lokasiController.text,
                   'gambarPath': _imagePath,
+                  'kuota': int.tryParse(_kuotaController.text) ?? 0,
+                  'jenis': _jenisController.text,
+                  'deskripsi': _deskripsiController.text,
                 };
 
                 if (id == null) {
@@ -167,6 +193,9 @@ class _Widget2State extends State<Widget2> {
     String judul,
     String lokasi,
     String _imagePath,
+    String jenis,
+    int kuota,
+    String deskripsi,
   ) {
     showDialog(
       context: context,
@@ -209,6 +238,48 @@ class _Widget2State extends State<Widget2> {
                   ),
                   SizedBox(width: 3),
                   Text(lokasi, style: const TextStyle(fontSize: 16)),
+                ],
+              ),
+              Row(
+                children: [
+                  Text(
+                    "Jenis:",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  SizedBox(width: 3),
+                  Text(jenis, style: const TextStyle(fontSize: 16)),
+                ],
+              ),
+              Row(
+                children: [
+                  Text(
+                    "Kuota:",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  SizedBox(width: 3),
+                  Text(
+                    kuota?.toString() ?? "0",
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  Text(
+                    "Peskripsi:",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  SizedBox(width: 3),
+                  Text(deskripsi, style: const TextStyle(fontSize: 16)),
                 ],
               ),
             ],
@@ -301,6 +372,9 @@ class _Widget2State extends State<Widget2> {
                           _allLomba[index]['judul'],
                           _allLomba[index]['lokasi'],
                           _allLomba[index]['gambarPath'],
+                          _allLomba[index]['jenis'],
+                          _allLomba[index]['kuota'],
+                          _allLomba[index]['deskripsi'],
                         );
                       },
                       child: _allLomba[index]['gambarPath'] != null

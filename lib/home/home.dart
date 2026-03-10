@@ -1,11 +1,15 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:match_discovery/database/preferences.dart';
+import 'package:match_discovery/database/sql_lite.dart';
 import 'package:match_discovery/extension/navigator.dart';
 import 'package:match_discovery/home/history_lomba.dart';
 import 'package:match_discovery/home/isihome.dart';
 import 'package:match_discovery/home/profil.dart';
 import 'package:match_discovery/home/tambah_lomba.dart';
 import 'package:match_discovery/login/login.dart';
+import 'package:match_discovery/models/login_model.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -26,6 +30,31 @@ class _HomeState extends State<Home> {
     setState(() {});
   }
 
+  int? _userId;
+  LoginModel? _user;
+  @override
+  void initState() {
+    super.initState();
+    _loadUserId();
+    _fetchUserData();
+  }
+
+  Future<void> _loadUserId() async {
+    int? id = await PreferenceHandler.getId();
+    setState(() {
+      _userId = id;
+    });
+  }
+
+  Future<void> _fetchUserData() async {
+    if (_userId != null) {
+      var data = await DBHelper.getUserById(_userId!);
+      setState(() {
+        _user = data; // Pastikan data ini berisi profilePath terbaru
+      });
+    }
+  }
+
   final _formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
@@ -36,10 +65,19 @@ class _HomeState extends State<Home> {
         actions: [
           IconButton(
             onPressed: () {
-              PreferenceHandler.deleteIsLogin();
               context.push(ProfilUser());
             },
-            icon: Icon(Icons.person),
+            icon: ClipOval(
+              child:
+                  _user?.profilePath != null && _user!.profilePath!.isNotEmpty
+                  ? Image.file(
+                      File(_user!.profilePath!),
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) =>
+                          const Icon(Icons.person, size: 80),
+                    )
+                  : const Icon(Icons.person, size: 80),
+            ),
           ),
         ],
         bottom: PreferredSize(

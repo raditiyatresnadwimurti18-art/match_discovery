@@ -126,6 +126,7 @@ class _ReggisterState extends State<Reggister> {
                         icon: Icon(Icons.phone),
                         hintText: 'No Tlpon',
                       ),
+                      keyboardType: TextInputType.number,
                     ),
                   ],
                 ),
