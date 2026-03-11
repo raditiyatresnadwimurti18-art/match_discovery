@@ -46,6 +46,17 @@ class DBHelper {
 
         // Opsional: Masukkan 1 akun admin default saat database dibuat
         await db.insert('admin', {'username': '111', 'password': '222'});
+        await db.execute('''
+  CREATE TABLE riwayatEvent (
+    id INTEGER PRIMARY KEY,
+    judul TEXT,
+    jenis TEXT,
+    tanggal TEXT,
+    lokasi TEXT,
+    gambarPath TEXT,
+    deskripsi TEXT
+  )
+''');
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 3) {
@@ -194,24 +205,65 @@ class DBHelper {
 
   //Fungsi untuk mengambil riwayat lomba berdasarkan User ID
   static Future<void> ikutiLomba(RiwayatModel riwayat) async {
-    final dbs = await db();
-    int result = await dbs.insert('riwayat', riwayat.toMap());
-    print(
-      "Hasil simpan database: $result",
-    ); // Jika muncul angka > 0, berarti berhasil
+    final db = await DBHelper.db();
+
+    await db.transaction((txn) async {
+      // 1. Simpan data ke tabel riwayat (User mengikuti lomba)
+      await txn.insert('riwayat', riwayat.toMap());
+
+      // 2. Kurangi kuota di tabel lomba (Auto Decrement)
+      await txn.rawUpdate('UPDATE lomba SET kuota = kuota - 1 WHERE id = ?', [
+        riwayat.idLomba,
+      ]);
+
+      // 3. Ambil data lomba terbaru untuk cek kuota
+      List<Map<String, dynamic>> res = await txn.query(
+        'lomba',
+        where: 'id = ?',
+        whereArgs: [riwayat.idLomba],
+      );
+
+      if (res.isNotEmpty) {
+        int kuotaSekarang = res.first['kuota'];
+
+        // 4. Jika kuota habis (0), pindahkan ke tabel riwayatEvent
+        if (kuotaSekarang <= 0) {
+          Map<String, dynamic> lombaSelesai = Map.from(res.first);
+
+          // Hapus kolom kuota sebelum dipindahkan ke riwayatEvent
+          lombaSelesai.remove('kuota');
+
+          // Masukkan ke tabel riwayatEvent
+          await txn.insert('riwayatEvent', lombaSelesai);
+
+          // Hapus dari tabel lomba aktif agar tidak muncul di daftar
+          await txn.delete(
+            'lomba',
+            where: 'id = ?',
+            whereArgs: [riwayat.idLomba],
+          );
+        }
+      }
+    });
   }
 
-  // Fungsi untuk mengambil riwayat lomba berdasarkan User ID
-  static Future<List<Map<String, dynamic>>> getRiwayatLomba(int idUser) async {
-    final dbs = await db();
-    // Menggunakan JOIN untuk mengambil detail lombanya sekaligus
-    return await dbs.rawQuery(
+  static Future<List<Map<String, dynamic>>> getRiwayatEvent() async {
+    final db = await DBHelper.db();
+    // Mengambil semua data dari tabel riwayatEvent
+    return await db.query('riwayatEvent', orderBy: 'id DESC');
+  }
+
+  static Future<List<Map<String, dynamic>>> getRiwayatUser(int userId) async {
+    final db = await DBHelper.db();
+    // Mengambil data lomba yang diikuti oleh USER tertentu
+    return await db.rawQuery(
       '''
-    SELECT lomba.* FROM lomba 
-    INNER JOIN riwayat ON lomba.id = riwayat.idLomba 
+    SELECT lomba.judul, lomba.lokasi, lomba.tanggal, lomba.gambarPath
+    FROM riwayat
+    INNER JOIN lomba ON riwayat.idLomba = lomba.id
     WHERE riwayat.idUser = ?
   ''',
-      [idUser],
+      [userId],
     );
   }
 }

@@ -16,19 +16,16 @@ class _DaftarLombaState extends State<DaftarLomba> {
     int? userId = await PreferenceHandler.getId();
 
     if (userId != null) {
-      await DBHelper.ikutiLomba(
-        RiwayatModel(
-          idUser: userId,
-          idLomba: lombaId, // 'id' didapat dari parameter detail dialog
-        ),
-      );
+      await DBHelper.ikutiLomba(RiwayatModel(idUser: userId, idLomba: lombaId));
 
+      // Refresh data di layar
+      setState(() {});
+
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Berhasil mengikuti lomba!")),
       );
-      Navigator.pop(context); // Tutup dialog
-    } else {
-      // Arahkan ke login jika ID tidak ditemukan
+      Navigator.pop(context); // Tutup Dialog
     }
   }
 
@@ -80,9 +77,15 @@ class _DaftarLombaState extends State<DaftarLomba> {
                 int? idLomba = lomba['id'];
 
                 if (idLomba != null) {
-                  _konfirmasiIkutiLomba(idLomba);
-                } else {
-                  print("Error: ID Lomba tidak ditemukan");
+                  int? idLomba = lomba['id'];
+                  if (idLomba != null) {
+                    // Cukup panggil fungsinya, jangan mendefinisikan ulang di sini
+                    _konfirmasiIkutiLomba(idLomba);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("ID Lomba tidak valid")),
+                    );
+                  }
                 }
               },
               child: const Text("Daftar Sekarang"),

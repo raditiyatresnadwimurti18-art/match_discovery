@@ -10,62 +10,62 @@ class HistoryUser extends StatefulWidget {
 }
 
 class _HistoryUserState extends State<HistoryUser> {
-  int? _currentUserId;
+  Future<List<Map<String, dynamic>>>? _historyFuture;
 
   @override
   void initState() {
     super.initState();
-    _getUserId();
+    _initHistory();
   }
 
-  // Fungsi untuk mengambil ID user dari memori
-  Future<void> _getUserId() async {
+  void _initHistory() async {
     int? id = await PreferenceHandler.getId();
-    setState(() {
-      _currentUserId = id;
-    });
+    if (id != null) {
+      setState(() {
+        // Panggil fungsi getRiwayat yang sudah diperbaiki di DBHelper
+        _historyFuture = DBHelper.getRiwayatUser(id);
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          Expanded(
-            child: FutureBuilder<List<Map<String, dynamic>>>(
-              future: DBHelper.getRiwayatLomba(_currentUserId ?? 0),
+      appBar: AppBar(
+        title: const Text("Riwayat Saya"),
+      ), // Tambahkan AppBar agar rapi
+      body: _historyFuture == null
+          ? const Center(child: CircularProgressIndicator())
+          : FutureBuilder<List<Map<String, dynamic>>>(
+              future: _historyFuture,
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                if (snapshot.hasError) {
-                  return Center(child: Text("Error: ${snapshot.error}"));
-                }
-
-                if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(
-                    child: Text(
-                      "Riwayat masih kosong. Silakan ikuti lomba terlebih dahulu.",
-                    ),
-                  );
-                }
+                // ... logic snapshot sama seperti kode Anda ...
 
                 return ListView.builder(
+                  padding: const EdgeInsets.all(10),
                   itemCount: snapshot.data!.length,
                   itemBuilder: (context, index) {
                     final item = snapshot.data![index];
-                    return ListTile(
-                      title: Text(item['judul'] ?? 'No Title'),
-                      subtitle: Text(item['lokasi'] ?? 'No Location'),
+                    return Card(
+                      // Gunakan Card agar tampilannya lebih menarik
+                      child: ListTile(
+                        leading: const Icon(
+                          Icons.event_available,
+                          color: Colors.blue,
+                        ),
+                        title: Text(
+                          item['judul'] ?? 'No Title',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Text(
+                          "${item['lokasi']} • ${item['tanggal']}",
+                        ),
+                      ),
                     );
                   },
                 );
               },
             ),
-          ),
-        ],
-      ),
     );
   }
 }

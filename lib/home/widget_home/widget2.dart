@@ -23,6 +23,7 @@ class _Widget2State extends State<Widget2> {
   final TextEditingController _deskripsiController = TextEditingController();
   final TextEditingController _kuotaController = TextEditingController();
   final TextEditingController _jenisController = TextEditingController();
+  final TextEditingController _tanggalController = TextEditingController();
 
   @override
   void initState() {
@@ -51,6 +52,23 @@ class _Widget2State extends State<Widget2> {
 
   // --- FUNGSI CRUD UI ---
 
+  Future<void> _selectDate(BuildContext context) async {
+    DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2101),
+    );
+
+    if (picked != null) {
+      setState(() {
+        // Format tanggal sesuai keinginan (YYYY-MM-DD)
+        _tanggalController.text =
+            "${picked.year}-${picked.month}-${picked.day}";
+      });
+    }
+  }
+
   void _showForm(int? id) async {
     if (id != null) {
       final existingData = _allLomba.firstWhere(
@@ -59,14 +77,17 @@ class _Widget2State extends State<Widget2> {
       _judulController.text = existingData['judul'];
       _lokasiController.text = existingData['lokasi'];
       _deskripsiController.text = existingData['deskripsi'];
-      _kuotaController.text = existingData['kuota']?.toString() ?? "";
+      _kuotaController.text = existingData['kuota']?.toString() ?? "0";
       _jenisController.text = existingData['jenis'];
+      _tanggalController.text =
+          existingData['tanggal'] ?? "Tanggal belum diatur";
     } else {
       _judulController.clear();
       _lokasiController.clear();
       _deskripsiController.clear();
       _kuotaController.clear();
       _jenisController.clear();
+      _tanggalController.clear();
     }
 
     showModalBottomSheet(
@@ -122,6 +143,15 @@ class _Widget2State extends State<Widget2> {
               controller: _deskripsiController,
               decoration: const InputDecoration(labelText: 'deskripsi'),
             ),
+            TextField(
+              controller: _tanggalController,
+              readOnly: true,
+              decoration: const InputDecoration(
+                labelText: 'Tanggal Lomba',
+                suffixIcon: Icon(Icons.calendar_today),
+              ),
+              onTap: () => _selectDate(context),
+            ),
             const SizedBox(height: 20),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -135,6 +165,7 @@ class _Widget2State extends State<Widget2> {
                   'kuota': int.tryParse(_kuotaController.text) ?? 0,
                   'jenis': _jenisController.text,
                   'deskripsi': _deskripsiController.text,
+                  'tanggal': _tanggalController.text,
                 };
 
                 if (id == null) {
@@ -166,25 +197,6 @@ class _Widget2State extends State<Widget2> {
   }
 
   // late int id;
-  void _konfirmasiIkutiLomba(int lombaId) async {
-    int? userId = await PreferenceHandler.getId();
-
-    if (userId != null) {
-      await DBHelper.ikutiLomba(
-        RiwayatModel(
-          idUser: userId,
-          idLomba: lombaId, // 'id' didapat dari parameter detail dialog
-        ),
-      );
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Berhasil mengikuti lomba!")),
-      );
-      Navigator.pop(context); // Tutup dialog
-    } else {
-      // Arahkan ke login jika ID tidak ditemukan
-    }
-  }
 
   void _showDetailDialog(
     BuildContext context,
@@ -195,6 +207,7 @@ class _Widget2State extends State<Widget2> {
     String jenis,
     int kuota,
     String deskripsi,
+    String tanggal,
   ) {
     showDialog(
       context: context,
@@ -271,7 +284,7 @@ class _Widget2State extends State<Widget2> {
               Row(
                 children: [
                   Text(
-                    "Peskripsi:",
+                    "Deskripsi:",
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.grey,
@@ -281,28 +294,31 @@ class _Widget2State extends State<Widget2> {
                   Text(deskripsi, style: const TextStyle(fontSize: 16)),
                 ],
               ),
+              Row(
+                children: [
+                  Text(
+                    "Tanggal::",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  SizedBox(width: 3),
+                  Text(
+                    tanggal?.toString() ?? "0",
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                ],
+              ),
             ],
           ),
           actions: [
-            Row(
-              children: [
-                TextButton(
-                  onPressed: () {
-                    _konfirmasiIkutiLomba(id);
-                  },
-                  child: const Text(
-                    "Ikuti Lomba",
-                    style: TextStyle(color: Color(0xFF6366F1)),
-                  ),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text(
-                    "Tutup",
-                    style: TextStyle(color: Color(0xFF6366F1)),
-                  ),
-                ),
-              ],
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text(
+                "Tutup",
+                style: TextStyle(color: Color(0xFF6366F1)),
+              ),
             ),
           ],
         );
@@ -374,6 +390,7 @@ class _Widget2State extends State<Widget2> {
                           _allLomba[index]['jenis'],
                           _allLomba[index]['kuota'],
                           _allLomba[index]['deskripsi'],
+                          _allLomba[index]['tanggal'],
                         );
                       },
                       child: _allLomba[index]['gambarPath'] != null

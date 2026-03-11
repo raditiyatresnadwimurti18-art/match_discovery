@@ -5,6 +5,7 @@ import 'package:match_discovery/database/preferences.dart';
 import 'package:match_discovery/database/sql_lite.dart';
 import 'package:match_discovery/extension/navigator.dart';
 import 'package:match_discovery/home/profil.dart';
+import 'package:match_discovery/home_user/event_berlalu.dart';
 import 'package:match_discovery/home_user/history_user.dart';
 import 'package:match_discovery/home_user/isi_home_user.dart';
 import 'package:match_discovery/models/login_model.dart';
@@ -20,6 +21,7 @@ class _HomeUserState extends State<HomeUser> {
   static const List<Widget> _widgetOption = <Widget>[
     IsiHomeUser(),
     HistoryUser(),
+    EventBerlalu(),
   ];
   int _selectIndex = 0;
   void _ketikaDitekan(int index2) {
@@ -77,6 +79,7 @@ class _HomeUserState extends State<HomeUser> {
             ),
           ),
         ],
+        backgroundColor: const Color.fromARGB(255, 114, 234, 255),
         bottom: PreferredSize(
           preferredSize: Size.fromHeight(2),
           child: Container(
@@ -85,11 +88,16 @@ class _HomeUserState extends State<HomeUser> {
           ),
         ),
       ),
+
       body: Center(child: _widgetOption.elementAt(_selectIndex)),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.history), label: 'History'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.event),
+            label: 'Event Terlewat',
+          ),
         ],
         currentIndex: _selectIndex,
         onTap: _ketikaDitekan,

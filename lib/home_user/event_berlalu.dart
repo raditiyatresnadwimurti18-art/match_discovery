@@ -2,14 +2,14 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:match_discovery/database/sql_lite.dart';
 
-class HistoryLomba extends StatefulWidget {
-  const HistoryLomba({super.key});
+class EventBerlalu extends StatefulWidget {
+  const EventBerlalu({super.key});
 
   @override
-  State<HistoryLomba> createState() => _HistoryLombaState();
+  State<EventBerlalu> createState() => _EventBerlaluState();
 }
 
-class _HistoryLombaState extends State<HistoryLomba> {
+class _EventBerlaluState extends State<EventBerlalu> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

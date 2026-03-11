@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:match_discovery/home/widget_home/widget1.dart';
+import 'package:match_discovery/home_user/widget1.dart';
 import 'package:match_discovery/home/widget_home/widget2.dart';
 
 class IsiHome extends StatefulWidget {
@@ -23,7 +23,7 @@ class _IsiHomeState extends State<IsiHome> {
             mainAxisAlignment:
                 MainAxisAlignment.start, // Pastikan mulai dari atas
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [Widget1(), Widget2()],
+            children: [Widget2()],
           ),
         ),
       ),

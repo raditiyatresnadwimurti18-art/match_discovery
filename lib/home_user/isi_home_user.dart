@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:match_discovery/home_user/asset_lomba/daftar_lomba.dart';
+import 'package:match_discovery/home_user/widget1.dart';
 
 class IsiHomeUser extends StatefulWidget {
   const IsiHomeUser({super.key});
@@ -12,6 +13,8 @@ class IsiHomeUser extends StatefulWidget {
 class _IsiHomeUserState extends State<IsiHomeUser> {
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(child: Column(children: [DaftarLomba()]));
+    return SingleChildScrollView(
+      child: Column(children: [Widget1(), DaftarLomba()]),
+    );
   }
 }
