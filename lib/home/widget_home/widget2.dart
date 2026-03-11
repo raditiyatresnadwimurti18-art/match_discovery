@@ -60,7 +60,6 @@ class _Widget2State extends State<Widget2> {
       _lokasiController.text = existingData['lokasi'];
       _deskripsiController.text = existingData['deskripsi'];
       _kuotaController.text = existingData['kuota']?.toString() ?? "";
-      ;
       _jenisController.text = existingData['jenis'];
     } else {
       _judulController.clear();
@@ -387,7 +386,7 @@ class _Widget2State extends State<Widget2> {
                                 fit: BoxFit.cover,
                               ),
                             )
-                          : const Icon(Icons.image_not_supported),
+                          : Icon(Icons.image_not_supported),
                     ),
                     title: Text(
                       _allLomba[index]['judul'],

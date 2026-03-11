@@ -48,4 +48,14 @@ class PreferenceHandler {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_id);
   }
+
+  static Future<void> setRole(String role) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('role', role);
+  }
+
+  static Future<String?> getRole() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('role');
+  }
 }

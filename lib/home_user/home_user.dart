@@ -4,20 +4,23 @@ import 'package:flutter/material.dart';
 import 'package:match_discovery/database/preferences.dart';
 import 'package:match_discovery/database/sql_lite.dart';
 import 'package:match_discovery/extension/navigator.dart';
-import 'package:match_discovery/home/history_lomba.dart';
-import 'package:match_discovery/home/isihome.dart';
 import 'package:match_discovery/home/profil.dart';
+import 'package:match_discovery/home_user/history_user.dart';
+import 'package:match_discovery/home_user/isi_home_user.dart';
 import 'package:match_discovery/models/login_model.dart';
 
-class Home extends StatefulWidget {
-  const Home({super.key});
+class HomeUser extends StatefulWidget {
+  const HomeUser({super.key});
 
   @override
-  State<Home> createState() => _HomeState();
+  State<HomeUser> createState() => _HomeUserState();
 }
 
-class _HomeState extends State<Home> {
-  static const List<Widget> _widgetOption = <Widget>[IsiHome(), HistoryLomba()];
+class _HomeUserState extends State<HomeUser> {
+  static const List<Widget> _widgetOption = <Widget>[
+    IsiHomeUser(),
+    HistoryUser(),
+  ];
   int _selectIndex = 0;
   void _ketikaDitekan(int index2) {
     _selectIndex = index2;

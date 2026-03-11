@@ -3,6 +3,7 @@ import 'package:match_discovery/database/preferences.dart';
 import 'package:match_discovery/database/sql_lite.dart';
 import 'package:match_discovery/extension/navigator.dart';
 import 'package:match_discovery/home/home.dart';
+import 'package:match_discovery/home_user/home_user.dart';
 import 'package:match_discovery/login/reggister.dart';
 import 'package:match_discovery/models/login_model.dart';
 
@@ -97,7 +98,7 @@ class _Login1State extends State<Login1> {
                             await Future.delayed(Duration(seconds: 2));
                             if (_formKey.currentState!.validate()) {
                               PreferenceHandler.storingIsLogin(true);
-                              context.pushAndRemoveAll(Home());
+                              context.pushAndRemoveAll(HomeUser());
                             }
                           } else {
                             // LOGIN GAGAL

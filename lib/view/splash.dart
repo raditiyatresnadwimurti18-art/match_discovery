@@ -6,6 +6,7 @@ import 'package:match_discovery/database/preferences.dart';
 // import 'package:flutter_ppkd_r_1/tugas_flutter11/login1.dart';
 import 'package:match_discovery/extension/navigator.dart';
 import 'package:match_discovery/home/home.dart';
+import 'package:match_discovery/home_user/home_user.dart';
 import 'package:match_discovery/login/login.dart';
 
 class SplashscreenT16 extends StatefulWidget {
@@ -23,13 +24,26 @@ class _SplashscreenT16State extends State<SplashscreenT16> {
   }
 
   void autoLogin() async {
-    await Future.delayed(Duration(seconds: 2));
-    bool? data = await PreferenceHandler.getIsLogin();
+    await Future.delayed(const Duration(seconds: 2));
 
-    if (data == true) {
-      context.pushAndRemoveAll(Home());
+    // 1. Cek apakah sudah login
+    bool? isLogin = await PreferenceHandler.getIsLogin();
+
+    if (isLogin == true) {
+      // 2. Cek Role-nya siapa (Admin atau User)
+      String? role = await PreferenceHandler.getRole(); // Ambil role dari prefs
+
+      if (role == 'admin') {
+        // Jika admin, lempar ke halaman Dashboard Admin
+        context.pushAndRemoveAll(Home());
+        print("Arahkan ke Admin Dashboard");
+      } else {
+        // Jika user biasa, lempar ke Home
+        context.pushAndRemoveAll(const HomeUser());
+      }
     } else {
-      context.pushAndRemoveAll(Login());
+      // 3. Jika belum login, ke halaman Welcome/Login
+      context.pushAndRemoveAll(const Login());
     }
   }
 

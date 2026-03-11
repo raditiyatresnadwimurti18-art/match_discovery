@@ -1,8 +1,70 @@
 import 'package:flutter/material.dart';
+import 'package:match_discovery/database/sql_lite.dart';
+import 'package:match_discovery/extension/navigator.dart';
+import 'package:match_discovery/home/home.dart';
 import 'package:match_discovery/login/login1.dart';
 
-class Login extends StatelessWidget {
+class Login extends StatefulWidget {
   const Login({super.key});
+
+  @override
+  State<Login> createState() => _LoginState();
+}
+
+class _LoginState extends State<Login> {
+  void _showAdminLoginDialog(BuildContext context) {
+    final TextEditingController userAdmin = TextEditingController();
+    final TextEditingController passAdmin = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Login Admin"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: userAdmin,
+              decoration: InputDecoration(labelText: "Username Admin"),
+            ),
+            TextField(
+              controller: passAdmin,
+              obscureText: true,
+              decoration: InputDecoration(labelText: "Password"),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text("Batal"),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              bool success = await DBHelper.loginAdmin(
+                username: userAdmin.text,
+                password: passAdmin.text,
+              );
+
+              if (success) {
+                (context).push(Home());
+                // Arahkan ke halaman dashboard admin (misal: AdminPage)
+                // Navigator.push(context, MaterialPageRoute(builder: (context) => AdminPage()));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Login Admin Berhasil!")),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Username atau Password Salah")),
+                );
+              }
+            },
+            child: Text("Login"),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -177,6 +239,21 @@ class Login extends StatelessWidget {
                           Text('Lanjut', style: TextStyle(color: Colors.white)),
                           Icon(Icons.chevron_right, color: Colors.white),
                         ],
+                      ),
+                    ),
+                  ),
+
+                  TextButton(
+                    onPressed: () {
+                      // Arahkan ke halaman login khusus admin atau
+                      // munculkan dialog login admin
+                      _showAdminLoginDialog(context);
+                    },
+                    child: Text(
+                      'Masuk sebagai Admin',
+                      style: TextStyle(
+                        color: Colors.grey[700],
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),

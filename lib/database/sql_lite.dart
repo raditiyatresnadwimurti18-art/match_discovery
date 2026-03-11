@@ -10,7 +10,7 @@ class DBHelper {
     final dbPath = await getDatabasesPath();
     return openDatabase(
       join(dbPath, 'Match_Discovery_db'),
-      version: 4,
+      version: 5,
       onCreate: (db, version) async {
         await db.execute(
           'CREATE TABLE user (id INTEGER PRIMARY KEY AUTOINCREMENT, nama TEXT, password TEXT, email TEXT, tlpon TEXT, profilePath TEXT)',
@@ -35,6 +35,17 @@ class DBHelper {
           tanggalDaftar TEXT
         )
       ''');
+        // Tabel Admin (BARU)
+        await db.execute('''
+          CREATE TABLE admin (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT,
+            password TEXT
+          )
+        ''');
+
+        // Opsional: Masukkan 1 akun admin default saat database dibuat
+        await db.insert('admin', {'username': '111', 'password': '222'});
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 3) {
@@ -65,6 +76,22 @@ class DBHelper {
           )
         ''');
         }
+        if (oldVersion < 5) {
+          // Tambah tabel admin jika user melakukan update ke versi 5
+          await db.execute('''
+            CREATE TABLE IF NOT EXISTS admin (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              username TEXT,
+              password TEXT
+            )
+          ''');
+
+          // Tambahkan admin default
+          await db.insert('admin', {
+            'username': 'admin123',
+            'password': 'adminpassword',
+          });
+        }
       },
     );
   }
@@ -90,6 +117,27 @@ class DBHelper {
       return LoginModel.fromMap(result.first);
     }
     return null;
+  }
+  // --- FUNGSI KHUSUS ADMIN ---
+
+  static Future<bool> loginAdmin({
+    required String username,
+    required String password,
+  }) async {
+    final dbs = await db();
+    final List<Map<String, dynamic>> result = await dbs.query(
+      "admin",
+      where: 'username = ? AND password = ?',
+      whereArgs: [username, password],
+    );
+
+    if (result.isNotEmpty) {
+      // Simpan status admin di Preference jika perlu
+      await PreferenceHandler.storingId(result.first['id']);
+      // Kamu bisa buat PreferenceHandler.setRole('admin') jika ingin membedakan session
+      return true;
+    }
+    return false;
   }
 
   static Future<LoginModel?> getUserById(int id) async {
