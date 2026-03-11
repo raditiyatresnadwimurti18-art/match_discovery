@@ -14,7 +14,13 @@ class _IsiHomeUserState extends State<IsiHomeUser> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      child: Column(children: [Widget1(), DaftarLomba()]),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [Widget1(), DaftarLomba()],
+        ),
+      ),
     );
   }
 }

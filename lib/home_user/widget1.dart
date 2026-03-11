@@ -17,7 +17,7 @@ class Widget1 extends StatelessWidget {
         TextField(
           decoration: InputDecoration(
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
-            labelText: 'Cari kompetisi impoanmu',
+            labelText: 'Cari kompetisi impianmu',
             icon: Icon(Icons.search),
             suffixIcon: Icon(Icons.filter_list),
           ),

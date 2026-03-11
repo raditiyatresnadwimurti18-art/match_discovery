@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:match_discovery/database/preferences.dart';
 import 'package:match_discovery/database/sql_lite.dart';
 import 'package:match_discovery/extension/navigator.dart';
-import 'package:match_discovery/home/history_lomba.dart';
-import 'package:match_discovery/home/isihome.dart';
-import 'package:match_discovery/home/profil.dart';
+import 'package:match_discovery/home_admin/history_lomba.dart';
+import 'package:match_discovery/home_admin/isihome.dart';
+import 'package:match_discovery/home_admin/profil_admin.dart';
 import 'package:match_discovery/models/login_model.dart';
 
 class Home extends StatefulWidget {
@@ -57,7 +57,7 @@ class _HomeState extends State<Home> {
         actions: [
           IconButton(
             onPressed: () {
-              context.push(ProfilUser()).then((_) {
+              context.push(ProfilAdmin()).then((_) {
                 _fetchUserData();
               });
             },

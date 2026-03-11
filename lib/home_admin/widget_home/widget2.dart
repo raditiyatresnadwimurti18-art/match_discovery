@@ -4,7 +4,6 @@ import 'package:match_discovery/database/preferences.dart';
 import 'package:match_discovery/database/sql_lite.dart';
 import 'package:match_discovery/models/login_model.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:match_discovery/models/riwayat_model.dart';
 
 class Widget2 extends StatefulWidget {
   const Widget2({super.key});

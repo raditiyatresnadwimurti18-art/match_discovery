@@ -28,6 +28,44 @@ class _HistoryUserState extends State<HistoryUser> {
     }
   }
 
+  void _showConfirmationDialog(int lombaId) async {
+    int? userId = await PreferenceHandler.getId();
+    if (userId == null) return;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Konfirmasi Selesai"),
+        content: const Text(
+          "Apakah kamu sudah selesai mengikuti event ini? Data akan dipindahkan ke riwayat akhir.",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Batal"),
+          ),
+          TextButton(
+            onPressed: () async {
+              await DBHelper.konfirmasiSelesaiManual(userId, lombaId);
+              Navigator.pop(context); // Tutup dialog
+              _initHistory(); // Refresh list riwayat
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text("Event berhasil dikonfirmasi selesai!"),
+                ),
+              );
+            },
+            child: const Text(
+              "Ya, Selesai",
+              style: TextStyle(color: Colors.green),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,12 +78,30 @@ class _HistoryUserState extends State<HistoryUser> {
               future: _historyFuture,
               builder: (context, snapshot) {
                 // ... logic snapshot sama seperti kode Anda ...
+                if (snapshot.hasError) {
+                  return Center(
+                    child: Text("Terjadi kesalahan: ${snapshot.error}"),
+                  );
+                }
+
+                // 2. Cek jika data masih loading
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                // 3. Cek jika data kosong
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(
+                    child: Text("Belum ada riwayat pendaftaran."),
+                  );
+                }
 
                 return ListView.builder(
                   padding: const EdgeInsets.all(10),
                   itemCount: snapshot.data!.length,
                   itemBuilder: (context, index) {
                     final item = snapshot.data![index];
+                    final int lombaId = item['idLomba'];
                     return Card(
                       // Gunakan Card agar tampilannya lebih menarik
                       child: ListTile(
@@ -59,6 +115,15 @@ class _HistoryUserState extends State<HistoryUser> {
                         ),
                         subtitle: Text(
                           "${item['lokasi']} • ${item['tanggal']}",
+                        ),
+                        isThreeLine: true,
+                        trailing: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            foregroundColor: Colors.white,
+                          ),
+                          onPressed: () => _showConfirmationDialog(lombaId),
+                          child: const Text("Selesai"),
                         ),
                       ),
                     );

@@ -10,6 +10,58 @@ class HistoryLomba extends StatefulWidget {
 }
 
 class _HistoryLombaState extends State<HistoryLomba> {
+  // 1. Tambahkan variabel untuk menyimpan future
+  Future<List<Map<String, dynamic>>>? _historyFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    // 2. Inisialisasi data pertama kali
+    _refreshData();
+  }
+
+  // 3. Fungsi khusus untuk memuat ulang data
+  void _refreshData() {
+    setState(() {
+      _historyFuture = DBHelper.getRiwayatEvent();
+    });
+  }
+
+  void _showDeleteDialog(int id) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Konfirmasi Hapus"),
+          content: const Text(
+            "Apakah kamu yakin ingin menghapus riwayat event ini?",
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Batal"),
+            ),
+            TextButton(
+              onPressed: () async {
+                await DBHelper.deleteRiwayatEvent(id);
+                if (mounted) {
+                  Navigator.pop(context);
+                  // 4. Panggil refresh data setelah hapus berhasil
+                  _refreshData();
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Riwayat telah dihapus")),
+                  );
+                }
+              },
+              child: const Text("Hapus", style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,8 +74,8 @@ class _HistoryLombaState extends State<HistoryLomba> {
         elevation: 0,
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
-        // Kita perlu buat fungsi getRiwayatEvent di DBHelper
-        future: DBHelper.getRiwayatEvent(),
+        // 5. Gunakan variabel _historyFuture
+        future: _historyFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -58,8 +110,7 @@ class _HistoryLombaState extends State<HistoryLomba> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Opacity(
-                  opacity:
-                      0.7, // Memberikan efek "grayscale/redup" karena sudah lewat
+                  opacity: 0.7,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -84,11 +135,14 @@ class _HistoryLombaState extends State<HistoryLomba> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(
-                                  event['judul'] ?? "",
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
+                                Expanded(
+                                  // Tambahkan Expanded agar teks panjang tidak error
+                                  child: Text(
+                                    event['judul'] ?? "",
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
                                 Container(
@@ -111,6 +165,16 @@ class _HistoryLombaState extends State<HistoryLomba> {
                             const SizedBox(height: 5),
                             Text("Lokasi: ${event['lokasi']}"),
                             Text("Tanggal: ${event['tanggal']}"),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: IconButton(
+                                icon: const Icon(
+                                  Icons.delete,
+                                  color: Colors.red,
+                                ),
+                                onPressed: () => _showDeleteDialog(event['id']),
+                              ),
+                            ),
                           ],
                         ),
                       ),

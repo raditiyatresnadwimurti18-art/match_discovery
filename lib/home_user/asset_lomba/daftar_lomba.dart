@@ -12,14 +12,21 @@ class DaftarLomba extends StatefulWidget {
 }
 
 class _DaftarLombaState extends State<DaftarLomba> {
+  late Future<List<Map<String, dynamic>>> _lombaFuture;
+  @override
+  void _refreshData() {
+    setState(() {
+      _lombaFuture = DBHelper.getAllLomba();
+    });
+  }
+
   void _konfirmasiIkutiLomba(int lombaId) async {
     int? userId = await PreferenceHandler.getId();
 
     if (userId != null) {
       await DBHelper.ikutiLomba(RiwayatModel(idUser: userId, idLomba: lombaId));
 
-      // Refresh data di layar
-      setState(() {});
+      _refreshData();
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -29,7 +36,19 @@ class _DaftarLombaState extends State<DaftarLomba> {
     }
   }
 
-  void _showLombaDetail(BuildContext context, Map<String, dynamic> lomba) {
+  void _showLombaDetail(
+    BuildContext context,
+    Map<String, dynamic> lomba,
+  ) async {
+    int? userId = await PreferenceHandler.getId();
+    int lombaId = lomba['id'];
+    if (userId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Silahkan login terlebih dahulu")),
+      );
+      return;
+    }
+    bool sedangIkut = await DBHelper.isUserSedangIkutLomba(userId, lombaId);
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -68,27 +87,19 @@ class _DaftarLombaState extends State<DaftarLomba> {
             ),
           ),
           actions: [
-            TextButton(
+            ElevatedButton(
               onPressed: () => Navigator.pop(context),
               child: const Text("Tutup"),
             ),
+            // 3. Logika Tombol: Jika sedang ikut, tombol jadi Non-aktif/Berbeda
             ElevatedButton(
-              onPressed: () {
-                int? idLomba = lomba['id'];
-
-                if (idLomba != null) {
-                  int? idLomba = lomba['id'];
-                  if (idLomba != null) {
-                    // Cukup panggil fungsinya, jangan mendefinisikan ulang di sini
-                    _konfirmasiIkutiLomba(idLomba);
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("ID Lomba tidak valid")),
-                    );
-                  }
-                }
-              },
-              child: const Text("Daftar Sekarang"),
+              onPressed: sedangIkut
+                  ? null
+                  : () => _konfirmasiIkutiLomba(lombaId),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: sedangIkut ? Colors.grey : Colors.blue,
+              ),
+              child: Text(sedangIkut ? "Sudah Terdaftar" : "Daftar Sekarang"),
             ),
           ],
         );

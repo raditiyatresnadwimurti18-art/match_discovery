@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:match_discovery/database/preferences.dart';
 import 'package:match_discovery/database/sql_lite.dart';
 import 'package:match_discovery/extension/navigator.dart';
-import 'package:match_discovery/home/profil.dart';
+import 'package:match_discovery/home_user/profil.dart';
 import 'package:match_discovery/home_user/event_berlalu.dart';
 import 'package:match_discovery/home_user/history_user.dart';
 import 'package:match_discovery/home_user/isi_home_user.dart';
@@ -89,7 +89,7 @@ class _HomeUserState extends State<HomeUser> {
         ),
       ),
 
-      body: Center(child: _widgetOption.elementAt(_selectIndex)),
+      body: _widgetOption.elementAt(_selectIndex),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),

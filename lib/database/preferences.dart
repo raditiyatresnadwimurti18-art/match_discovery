@@ -15,12 +15,12 @@ class PreferenceHandler {
   //CREATE
   static Future<void> storingIsLogin(bool isLogin) async {
     final prefs = await SharedPreferences.getInstance();
-    prefs.setBool(_isLogin, isLogin);
+    await prefs.setBool(_isLogin, isLogin);
   }
 
   static Future<void> storingId(int id) async {
     final prefs = await SharedPreferences.getInstance();
-    prefs.setInt(_id, id);
+    await prefs.setInt(_id, id);
   }
 
   //GET

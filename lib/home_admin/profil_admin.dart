@@ -8,14 +8,14 @@ import 'package:match_discovery/login/login.dart';
 import 'package:match_discovery/models/login_model.dart';
 import 'package:image_picker/image_picker.dart';
 
-class ProfilUser extends StatefulWidget {
-  const ProfilUser({super.key});
+class ProfilAdmin extends StatefulWidget {
+  const ProfilAdmin({super.key});
 
   @override
-  State<ProfilUser> createState() => _ProfilUserState();
+  State<ProfilAdmin> createState() => _ProfilAdminState();
 }
 
-class _ProfilUserState extends State<ProfilUser> {
+class _ProfilAdminState extends State<ProfilAdmin> {
   final ImagePicker _picker = ImagePicker();
 
   Future<void> _pickImage() async {

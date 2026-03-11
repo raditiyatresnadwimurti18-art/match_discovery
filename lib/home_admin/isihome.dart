@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:match_discovery/home_user/widget1.dart';
-import 'package:match_discovery/home/widget_home/widget2.dart';
+import 'package:match_discovery/home_admin/widget_home/widget2.dart';
 
 class IsiHome extends StatefulWidget {
   const IsiHome({super.key});

@@ -10,7 +10,7 @@ class DBHelper {
     final dbPath = await getDatabasesPath();
     return openDatabase(
       join(dbPath, 'Match_Discovery_db'),
-      version: 5,
+      version: 6,
       onCreate: (db, version) async {
         await db.execute(
           'CREATE TABLE user (id INTEGER PRIMARY KEY AUTOINCREMENT, nama TEXT, password TEXT, email TEXT, tlpon TEXT, profilePath TEXT)',
@@ -48,7 +48,8 @@ class DBHelper {
         await db.insert('admin', {'username': '111', 'password': '222'});
         await db.execute('''
   CREATE TABLE riwayatEvent (
-    id INTEGER PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTOINCREMENT, -- Tambahkan AUTOINCREMENT
+    idLombaAsli INTEGER,                  -- Simpan ID asli di kolom berbeda
     judul TEXT,
     jenis TEXT,
     tanggal TEXT,
@@ -103,13 +104,32 @@ class DBHelper {
             'password': 'adminpassword',
           });
         }
+        if (oldVersion < 6) {
+          await db.execute('DROP TABLE IF EXISTS riwayatEvent');
+          await db.execute('''
+    CREATE TABLE riwayatEvent (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      idLombaAsli INTEGER,
+      judul TEXT,
+      jenis TEXT,
+      tanggal TEXT,
+      lokasi TEXT,
+      gambarPath TEXT,
+      deskripsi TEXT
+    )
+  ''');
+        }
       },
     );
   }
 
   static Future<void> registerUser(LoginModel user) async {
     final dbs = await db();
-    await dbs.insert('user', user.toMap());
+    await dbs.insert(
+      'user',
+      user.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace, // Tambahkan ini
+    );
   }
 
   static Future<LoginModel?> loginUser({
@@ -123,11 +143,19 @@ class DBHelper {
       whereArgs: [email, password],
     );
     if (result.isNotEmpty) {
+      // 1. Ambil data user dari hasil query
       final data = LoginModel.fromMap(result.first);
-      PreferenceHandler.storingId(data.id!);
-      return LoginModel.fromMap(result.first);
+
+      // 2. SIMPAN KE PREFERENCES (Bagian yang kamu tanyakan)
+      // Ini agar aplikasi ingat siapa yang login saat dibuka kembali
+      await PreferenceHandler.storingId(data.id!);
+      await PreferenceHandler.storingIsLogin(true);
+      await PreferenceHandler.setRole('user'); // Menandai bahwa ini adalah USER
+
+      return data; // Kembalikan data untuk diproses di UI
+    } else {
+      return null; // Login gagal
     }
-    return null;
   }
   // --- FUNGSI KHUSUS ADMIN ---
 
@@ -143,12 +171,16 @@ class DBHelper {
     );
 
     if (result.isNotEmpty) {
-      // Simpan status admin di Preference jika perlu
+      // --- MULAI TARUH DI SINI ---
       await PreferenceHandler.storingId(result.first['id']);
-      // Kamu bisa buat PreferenceHandler.setRole('admin') jika ingin membedakan session
+      await PreferenceHandler.storingIsLogin(true); // Menandai sudah login
+      await PreferenceHandler.setRole('admin'); // Menandai sebagai ADMIN
+      // --- SELESAI ---
+
       return true;
+    } else {
+      return false;
     }
-    return false;
   }
 
   static Future<LoginModel?> getUserById(int id) async {
@@ -208,15 +240,12 @@ class DBHelper {
     final db = await DBHelper.db();
 
     await db.transaction((txn) async {
-      // 1. Simpan data ke tabel riwayat (User mengikuti lomba)
       await txn.insert('riwayat', riwayat.toMap());
 
-      // 2. Kurangi kuota di tabel lomba (Auto Decrement)
       await txn.rawUpdate('UPDATE lomba SET kuota = kuota - 1 WHERE id = ?', [
         riwayat.idLomba,
       ]);
 
-      // 3. Ambil data lomba terbaru untuk cek kuota
       List<Map<String, dynamic>> res = await txn.query(
         'lomba',
         where: 'id = ?',
@@ -226,44 +255,94 @@ class DBHelper {
       if (res.isNotEmpty) {
         int kuotaSekarang = res.first['kuota'];
 
-        // 4. Jika kuota habis (0), pindahkan ke tabel riwayatEvent
-        if (kuotaSekarang <= 0) {
-          Map<String, dynamic> lombaSelesai = Map.from(res.first);
-
-          // Hapus kolom kuota sebelum dipindahkan ke riwayatEvent
-          lombaSelesai.remove('kuota');
-
-          // Masukkan ke tabel riwayatEvent
-          await txn.insert('riwayatEvent', lombaSelesai);
-
-          // Hapus dari tabel lomba aktif agar tidak muncul di daftar
-          await txn.delete(
-            'lomba',
-            where: 'id = ?',
+        if (kuotaSekarang == 0) {
+          List<Map<String, dynamic>> cek = await txn.query(
+            'riwayatEvent',
+            where: 'idLombaAsli = ?',
             whereArgs: [riwayat.idLomba],
           );
+
+          // Hanya masukkan jika belum ada
+          if (cek.isEmpty) {
+            Map<String, dynamic> lombaSelesai = Map.from(res.first);
+            int idAsli = lombaSelesai['id'];
+            lombaSelesai.remove('id');
+            lombaSelesai.remove('kuota');
+            lombaSelesai['idLombaAsli'] = idAsli;
+
+            await txn.insert(
+              'riwayatEvent',
+              lombaSelesai,
+              conflictAlgorithm: ConflictAlgorithm.replace,
+            );
+
+            await txn.delete('lomba', where: 'id = ?', whereArgs: [idAsli]);
+          }
         }
       }
     });
   }
 
+  static Future<bool> isUserSedangIkutLomba(int userId, int lombaId) async {
+    final dbs = await db();
+
+    // Cek apakah user sudah ada di tabel riwayat untuk lomba ini
+    final List<Map<String, dynamic>> result = await dbs.query(
+      'riwayat',
+      where: 'idUser = ? AND idLomba = ?',
+      whereArgs: [userId, lombaId],
+    );
+
+    // Jika tidak kosong, berarti user sedang mengikuti event ini
+    return result.isNotEmpty;
+  }
+
   static Future<List<Map<String, dynamic>>> getRiwayatEvent() async {
     final db = await DBHelper.db();
-    // Mengambil semua data dari tabel riwayatEvent
-    return await db.query('riwayatEvent', orderBy: 'id DESC');
+    // Tambahkan 'id' ke dalam SELECT agar UI bisa menghapusnya
+    return await db.rawQuery(
+      'SELECT DISTINCT id, judul, lokasi, tanggal, gambarPath, deskripsi FROM riwayatEvent ORDER BY id DESC',
+    );
   }
 
   static Future<List<Map<String, dynamic>>> getRiwayatUser(int userId) async {
     final db = await DBHelper.db();
-    // Mengambil data lomba yang diikuti oleh USER tertentu
     return await db.rawQuery(
       '''
-    SELECT lomba.judul, lomba.lokasi, lomba.tanggal, lomba.gambarPath
+    SELECT 
+      COALESCE(lomba.judul, re.judul) as judul, 
+      COALESCE(lomba.lokasi, re.lokasi) as lokasi, 
+      COALESCE(lomba.tanggal, re.tanggal) as tanggal, 
+      COALESCE(lomba.gambarPath, re.gambarPath) as gambarPath, 
+      riwayat.idLomba
     FROM riwayat
-    INNER JOIN lomba ON riwayat.idLomba = lomba.id
+    LEFT JOIN lomba ON riwayat.idLomba = lomba.id
+    LEFT JOIN riwayatEvent re ON riwayat.idLomba = re.idLombaAsli
     WHERE riwayat.idUser = ?
-  ''',
+    ''',
       [userId],
     );
+  }
+
+  static Future<void> konfirmasiSelesaiManual(int userId, int lombaId) async {
+    final dbs = await db();
+
+    await dbs.transaction((txn) async {
+      await txn.delete(
+        'riwayat',
+        where: 'idUser = ? AND idLomba = ?',
+        whereArgs: [userId, lombaId],
+      );
+    });
+  }
+
+  static Future<int> deleteRiwayatEvent(int id) async {
+    final dbs = await db();
+    return await dbs.delete('riwayatEvent', where: 'id = ?', whereArgs: [id]);
+  }
+
+  static Future<int> deleteAllRiwayatEvent() async {
+    final dbs = await db();
+    return await dbs.delete('riwayatEvent');
   }
 }

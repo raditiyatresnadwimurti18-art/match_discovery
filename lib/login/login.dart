@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:match_discovery/database/preferences.dart';
 import 'package:match_discovery/database/sql_lite.dart';
 import 'package:match_discovery/extension/navigator.dart';
-import 'package:match_discovery/home/home.dart';
+import 'package:match_discovery/home_admin/home.dart';
 import 'package:match_discovery/login/login1.dart';
 
 class Login extends StatefulWidget {
@@ -48,8 +49,8 @@ class _LoginState extends State<Login> {
 
               if (success) {
                 (context).push(Home());
-                // Arahkan ke halaman dashboard admin (misal: AdminPage)
-                // Navigator.push(context, MaterialPageRoute(builder: (context) => AdminPage()));
+                await PreferenceHandler.storingIsLogin(true);
+                await PreferenceHandler.setRole('admin');
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text("Login Admin Berhasil!")),
                 );

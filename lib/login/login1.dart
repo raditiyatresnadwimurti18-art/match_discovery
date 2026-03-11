@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:match_discovery/database/preferences.dart';
 import 'package:match_discovery/database/sql_lite.dart';
 import 'package:match_discovery/extension/navigator.dart';
-import 'package:match_discovery/home/home.dart';
+import 'package:match_discovery/home_admin/home.dart';
 import 'package:match_discovery/home_user/home_user.dart';
 import 'package:match_discovery/login/reggister.dart';
 import 'package:match_discovery/models/login_model.dart';

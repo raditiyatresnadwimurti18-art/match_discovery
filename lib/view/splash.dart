@@ -5,7 +5,7 @@ import 'package:match_discovery/database/preferences.dart';
 // import 'package:flutter_ppkd_r_1/tugas_flutter11/login.dart';
 // import 'package:flutter_ppkd_r_1/tugas_flutter11/login1.dart';
 import 'package:match_discovery/extension/navigator.dart';
-import 'package:match_discovery/home/home.dart';
+import 'package:match_discovery/home_admin/home.dart';
 import 'package:match_discovery/home_user/home_user.dart';
 import 'package:match_discovery/login/login.dart';
 
