@@ -4,6 +4,7 @@ import 'package:match_discovery/database/sql_lite.dart';
 import 'package:match_discovery/extension/navigator.dart';
 import 'package:match_discovery/home_admin/home.dart';
 import 'package:match_discovery/login/login1.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -20,47 +21,63 @@ class _LoginState extends State<Login> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text("Login Admin"),
+        title: const Text("Login Admin"),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: userAdmin,
-              decoration: InputDecoration(labelText: "Username Admin"),
+              decoration: const InputDecoration(labelText: "Username Admin"),
             ),
             TextField(
               controller: passAdmin,
               obscureText: true,
-              decoration: InputDecoration(labelText: "Password"),
+              decoration: const InputDecoration(labelText: "Password"),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text("Batal"),
+            child: const Text("Batal"),
           ),
           ElevatedButton(
             onPressed: () async {
-              bool success = await DBHelper.loginAdmin(
+              // 1. Panggil fungsi login yang baru
+              var adminData = await DBHelper.loginAdminModel(
                 username: userAdmin.text,
                 password: passAdmin.text,
               );
 
-              if (success) {
-                (context).push(Home());
-                await PreferenceHandler.storingIsLogin(true);
+              if (adminData != null) {
+                // 2. Simpan Role Admin (Super/Biasa) ke Preferences
+                // Pastikan kamu sudah menambahkan fungsi setAdminRole di PreferenceHandler
                 await PreferenceHandler.setRole('admin');
+
+                // Tambahan: Simpan role spesifiknya (Misal pakai SharedPreferences langsung jika belum ada di PreferenceHandler)
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.setString('admin_type', adminData.role);
+
+                if (!mounted) return;
+                Navigator.pop(context); // Tutup Dialog
+
+                // 3. Pindah ke Home Admin
+                context.push(const Home());
+
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("Login Admin Berhasil!")),
+                  SnackBar(
+                    content: Text(
+                      "Selamat Datang, ${adminData.nama ?? 'Admin'}!",
+                    ),
+                  ),
                 );
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("Username atau Password Salah")),
+                  const SnackBar(content: Text("Username atau Password Salah")),
                 );
               }
             },
-            child: Text("Login"),
+            child: const Text("Login"),
           ),
         ],
       ),

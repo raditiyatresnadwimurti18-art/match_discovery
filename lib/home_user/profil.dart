@@ -147,27 +147,61 @@ class _ProfilUserState extends State<ProfilUser> {
               ),
             ),
           ),
+          Spacer(),
+          // Tombol Logout
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: SizedBox(
               height: 50,
               width: double.infinity,
               child: OutlinedButton(
-                onPressed: () async {
-                  await PreferenceHandler.deleteIsLogin();
-                  await PreferenceHandler.deleteId();
+                onPressed: () {
+                  // Tambahkan Dialog Konfirmasi di sini
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text("Konfirmasi Keluar"),
+                        content: const Text(
+                          "Apakah Anda yakin ingin logout dari aplikasi?",
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text("Batal"),
+                          ),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                              foregroundColor: Colors.white,
+                            ),
+                            onPressed: () async {
+                              // Hapus data session
+                              await PreferenceHandler.deleteIsLogin();
+                              await PreferenceHandler.deleteId();
 
-                  context.pushAndRemoveAll(Login());
+                              if (!mounted) return;
+                              // Tutup dialog dan pindah ke Login
+                              Navigator.pop(context);
+                              context.pushAndRemoveAll(const Login());
+                            },
+                            child: const Text("Keluar"),
+                          ),
+                        ],
+                      );
+                    },
+                  );
                 },
                 style: OutlinedButton.styleFrom(
                   backgroundColor: Colors.red,
                   foregroundColor: Colors.white,
-                  side: BorderSide(color: Colors.red),
+                  side: const BorderSide(color: Colors.red),
                 ),
-                child: Text('Log Out'),
+                child: const Text('Log Out'),
               ),
             ),
           ),
+          SizedBox(height: 30),
         ],
       ),
     );

@@ -188,13 +188,52 @@ class _Widget2State extends State<Widget2> {
   }
 
   void _deleteLomba(int id) async {
-    await DBHelper.deleteLomba(id);
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Berhasil menghapus data')));
-    _refreshLomba();
-  }
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Konfirmasi Hapus"),
+          content: const Text(
+            "Apakah Anda yakin ingin menghapus data lomba ini? Tindakan ini tidak dapat dibatalkan.",
+          ),
+          actions: [
+            // Tombol Batal
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Batal"),
+            ),
+            // Tombol Hapus (Konfirmasi)
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () async {
+                // 1. Jalankan fungsi hapus di Database
+                await DBHelper.deleteLomba(id);
 
+                // 2. Tutup dialog
+                if (!mounted) return;
+                Navigator.pop(context);
+
+                // 3. Refresh list UI
+                _refreshLomba();
+
+                // 4. Tampilkan SnackBar
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Berhasil menghapus data'),
+                    backgroundColor: Colors.redAccent,
+                  ),
+                );
+              },
+              child: const Text("Hapus"),
+            ),
+          ],
+        );
+      },
+    );
+  }
   // late int id;
 
   void _showDetailDialog(
