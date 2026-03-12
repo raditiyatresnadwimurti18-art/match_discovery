@@ -18,11 +18,6 @@ class HomeUser extends StatefulWidget {
 }
 
 class _HomeUserState extends State<HomeUser> {
-  static const List<Widget> _widgetOption = <Widget>[
-    IsiHomeUser(),
-    HistoryUser(),
-    EventBerlalu(),
-  ];
   int _selectIndex = 0;
   void _ketikaDitekan(int index2) {
     _selectIndex = index2;
@@ -48,7 +43,7 @@ class _HomeUserState extends State<HomeUser> {
     if (_userId != null) {
       var data = await DBHelper.getUserById(_userId!);
       setState(() {
-        _user = data; // Pastikan data ini berisi profilePath terbaru
+        _user = data;
       });
     }
   }
@@ -89,7 +84,10 @@ class _HomeUserState extends State<HomeUser> {
         ),
       ),
 
-      body: _widgetOption.elementAt(_selectIndex),
+      body: IndexedStack(
+        index: _selectIndex,
+        children: const <Widget>[IsiHomeUser(), HistoryUser(), EventBerlalu()],
+      ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),

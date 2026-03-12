@@ -72,7 +72,7 @@ class _ProfilAdminState extends State<ProfilAdmin> {
       body: Column(
         children: [
           SizedBox(
-            height: 300,
+            height: 500,
             width: double.infinity,
             child: Container(
               decoration: const BoxDecoration(
