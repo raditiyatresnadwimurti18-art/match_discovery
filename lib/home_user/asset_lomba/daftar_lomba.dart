@@ -138,6 +138,7 @@ class _DaftarLombaState extends State<DaftarLomba> {
         final listLomba = snapshot.data!;
 
         return GridView.builder(
+          physics: NeverScrollableScrollPhysics(),
           shrinkWrap: true,
           padding: const EdgeInsets.all(12),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(

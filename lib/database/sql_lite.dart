@@ -345,4 +345,52 @@ class DBHelper {
     final dbs = await db();
     return await dbs.delete('riwayatEvent');
   }
+
+  static Future<List<Map<String, dynamic>>> getPendaftarByLomba(
+    int idLomba,
+  ) async {
+    final dbs = await db();
+    return await dbs.rawQuery(
+      '''
+      SELECT 
+        user.nama, 
+        user.tlpon, 
+        riwayat.tanggalDaftar
+      FROM riwayat
+      INNER JOIN user ON riwayat.idUser = user.id
+      WHERE riwayat.idLomba = ?
+    ''',
+      [idLomba],
+    );
+  }
+
+  // Fungsi untuk Admin: Melihat ringkasan semua event beserta jumlah pendaftarnya
+  static Future<List<Map<String, dynamic>>>
+  getAllLombaDenganJumlahPendaftar() async {
+    final dbs = await db();
+    return await dbs.rawQuery('''
+      SELECT 
+        lomba.*, 
+        COUNT(riwayat.id) as totalPendaftar
+      FROM lomba
+      LEFT JOIN riwayat ON lomba.id = riwayat.idLomba
+      GROUP BY lomba.id
+      ORDER BY lomba.id DESC
+    ''');
+  }
+
+  static Future<List<Map<String, dynamic>>> getSemuaPendaftarGlobal() async {
+    final dbs = await db();
+    return await dbs.rawQuery('''
+    SELECT 
+      lomba.judul AS judul_lomba, 
+      user.nama AS nama_user, 
+      user.tlpon AS telepon_user,
+      riwayat.tanggalDaftar
+    FROM riwayat
+    INNER JOIN user ON riwayat.idUser = user.id
+    INNER JOIN lomba ON riwayat.idLomba = lomba.id
+    ORDER BY lomba.id DESC
+  ''');
+  }
 }

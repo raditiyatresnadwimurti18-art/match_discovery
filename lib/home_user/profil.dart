@@ -150,7 +150,7 @@ class _ProfilUserState extends State<ProfilUser> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: SizedBox(
-              height: 30,
+              height: 50,
               width: double.infinity,
               child: OutlinedButton(
                 onPressed: () async {
@@ -159,6 +159,11 @@ class _ProfilUserState extends State<ProfilUser> {
 
                   context.pushAndRemoveAll(Login());
                 },
+                style: OutlinedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                  side: BorderSide(color: Colors.red),
+                ),
                 child: Text('Log Out'),
               ),
             ),

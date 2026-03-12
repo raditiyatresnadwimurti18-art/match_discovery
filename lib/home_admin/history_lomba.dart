@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:match_discovery/database/sql_lite.dart';
+import 'package:match_discovery/database/sql_lite.dart'; // Pastikan path file DB sesuai
 
 class HistoryLomba extends StatefulWidget {
   const HistoryLomba({super.key});
@@ -10,17 +10,14 @@ class HistoryLomba extends StatefulWidget {
 }
 
 class _HistoryLombaState extends State<HistoryLomba> {
-  // 1. Tambahkan variabel untuk menyimpan future
   Future<List<Map<String, dynamic>>>? _historyFuture;
 
   @override
   void initState() {
     super.initState();
-    // 2. Inisialisasi data pertama kali
     _refreshData();
   }
 
-  // 3. Fungsi khusus untuk memuat ulang data
   void _refreshData() {
     setState(() {
       _historyFuture = DBHelper.getRiwayatEvent();
@@ -46,9 +43,7 @@ class _HistoryLombaState extends State<HistoryLomba> {
                 await DBHelper.deleteRiwayatEvent(id);
                 if (mounted) {
                   Navigator.pop(context);
-                  // 4. Panggil refresh data setelah hapus berhasil
                   _refreshData();
-
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text("Riwayat telah dihapus")),
                   );
@@ -67,124 +62,172 @@ class _HistoryLombaState extends State<HistoryLomba> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text("Event Telah Berakhir"),
+        title: const Text("Riwayat Event"),
         centerTitle: true,
-        backgroundColor: Colors.grey[200],
+        backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0,
       ),
-      body: FutureBuilder<List<Map<String, dynamic>>>(
-        // 5. Gunakan variabel _historyFuture
-        future: _historyFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      body: SafeArea(
+        child: FutureBuilder<List<Map<String, dynamic>>>(
+          future: _historyFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.event_busy, size: 80, color: Colors.grey[400]),
-                  const SizedBox(height: 10),
-                  const Text(
-                    "Belum ada event yang berakhir",
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          final listEvent = snapshot.data!;
-
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: listEvent.length,
-            itemBuilder: (context, index) {
-              final event = listEvent[index];
-              return Card(
-                margin: const EdgeInsets.only(bottom: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+            if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.event_busy, size: 80, color: Colors.grey[400]),
+                    const SizedBox(height: 10),
+                    const Text(
+                      "Belum ada riwayat event.",
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  ],
                 ),
-                child: Opacity(
-                  opacity: 0.7,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ClipRRect(
-                        borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(12),
-                        ),
-                        child: event['gambarPath'] != null
-                            ? Image.file(
-                                File(event['gambarPath']),
-                                height: 150,
-                                width: double.infinity,
-                                fit: BoxFit.cover,
-                              )
-                            : Container(height: 150, color: Colors.grey[300]),
+              );
+            }
+
+            final listEvent = snapshot.data!;
+
+            // --- BAGIAN SCROLLABLE ---
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  const Text(
+                    "Event Telah Berakhir",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Menggunakan Map untuk merender List Card di dalam Column
+                  ...listEvent.map((event) {
+                    return Card(
+                      margin: const EdgeInsets.only(bottom: 20),
+                      elevation: 3,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(12),
+                      child: Opacity(
+                        opacity: 0.8,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  // Tambahkan Expanded agar teks panjang tidak error
-                                  child: Text(
-                                    event['judul'] ?? "",
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
+                            // Gambar Event
+                            ClipRRect(
+                              borderRadius: const BorderRadius.vertical(
+                                top: Radius.circular(15),
+                              ),
+                              child:
+                                  event['gambarPath'] != null &&
+                                      event['gambarPath'].isNotEmpty
+                                  ? Image.file(
+                                      File(event['gambarPath']),
+                                      height: 160,
+                                      width: double.infinity,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : Container(
+                                      height: 160,
+                                      width: double.infinity,
+                                      color: Colors.grey[300],
+                                      child: const Icon(Icons.image, size: 50),
                                     ),
-                                  ),
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.all(4),
-                                  decoration: BoxDecoration(
-                                    color: Colors.red[100],
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: const Text(
-                                    "SELESAI",
-                                    style: TextStyle(
-                                      color: Colors.red,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ],
                             ),
-                            const SizedBox(height: 5),
-                            Text("Lokasi: ${event['lokasi']}"),
-                            Text("Tanggal: ${event['tanggal']}"),
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: IconButton(
-                                icon: const Icon(
-                                  Icons.delete,
-                                  color: Colors.red,
-                                ),
-                                onPressed: () => _showDeleteDialog(event['id']),
+
+                            Padding(
+                              padding: const EdgeInsets.all(15),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          event['judul'] ?? "Tanpa Judul",
+                                          style: const TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 4,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: Colors.red[50],
+                                          borderRadius: BorderRadius.circular(
+                                            5,
+                                          ),
+                                        ),
+                                        child: const Text(
+                                          "SELESAI",
+                                          style: TextStyle(
+                                            color: Colors.red,
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const Divider(height: 20),
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.location_on,
+                                        size: 16,
+                                        color: Colors.grey,
+                                      ),
+                                      const SizedBox(width: 5),
+                                      Text(event['lokasi'] ?? "-"),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 5),
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.calendar_today,
+                                        size: 16,
+                                        color: Colors.grey,
+                                      ),
+                                      const SizedBox(width: 5),
+                                      Text(event['tanggal'] ?? "-"),
+                                    ],
+                                  ),
+                                  Align(
+                                    alignment: Alignment.centerRight,
+                                    child: IconButton(
+                                      icon: const Icon(
+                                        Icons.delete_outline,
+                                        color: Colors.redAccent,
+                                      ),
+                                      onPressed: () =>
+                                          _showDeleteDialog(event['id']),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
                         ),
                       ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          );
-        },
+                    );
+                  }).toList(),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }

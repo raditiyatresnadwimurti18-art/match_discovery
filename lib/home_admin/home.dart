@@ -1,9 +1,9 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:match_discovery/database/preferences.dart';
 import 'package:match_discovery/database/sql_lite.dart';
 import 'package:match_discovery/extension/navigator.dart';
+import 'package:match_discovery/home_admin/data_user_lomba.dart';
 import 'package:match_discovery/home_admin/history_lomba.dart';
 import 'package:match_discovery/home_admin/isihome.dart';
 import 'package:match_discovery/home_admin/profil_admin.dart';
@@ -17,7 +17,11 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  static const List<Widget> _widgetOption = <Widget>[IsiHome(), HistoryLomba()];
+  static const List<Widget> _widgetOption = <Widget>[
+    IsiHome(),
+    DataUserLomba(),
+    HistoryLomba(),
+  ];
   int _selectIndex = 0;
   void _ketikaDitekan(int index2) {
     _selectIndex = index2;
@@ -86,6 +90,10 @@ class _HomeState extends State<Home> {
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.verified_user_rounded),
+            label: 'Data User',
+          ),
           BottomNavigationBarItem(icon: Icon(Icons.history), label: 'History'),
         ],
         currentIndex: _selectIndex,
